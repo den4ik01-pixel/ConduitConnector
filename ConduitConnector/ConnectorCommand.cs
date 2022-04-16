@@ -43,6 +43,8 @@ namespace ConduitConnector
                     if (elems.Count == 2)
                     {
                         Connector con1, con2;
+                        FamilyInstance elbow1 = null, elbow2 = null;
+                        Conduit conduit = null;
                         double katetA, katetBNeeded, katetBCurrent, hypotenuse;
                         LocationCurve loc1 = (elems[0].Location as LocationCurve);
                         LocationCurve loc2 = (elems[1].Location as LocationCurve);
@@ -67,23 +69,29 @@ namespace ConduitConnector
                             loc1.Curve = Line.CreateBound(A, C);
 
                             ConnectionHelper.getNeededConnectors(elems[0], elems[1], out con1, out con2);
-                            Conduit conduit = Conduit.Create(doc, elems[0].GetTypeId(), con1.Origin, con2.Origin, elems[0].LevelId);
+                            conduit = Conduit.Create(doc, elems[0].GetTypeId(), con1.Origin, con2.Origin, elems[0].LevelId);
                             Parameter diameter = conduit.get_Parameter(BuiltInParameter.RBS_CONDUIT_DIAMETER_PARAM);
                             diameter.Set((elems[0] as Conduit).Diameter);
 
                             ConnectionHelper.getNeededConnectors(elems[0], conduit, out con1, out con2);
-                            FamilyInstance elbow1 = doc.Create.NewElbowFitting(con1, con2);
+                            elbow1 = doc.Create.NewElbowFitting(con1, con2);
 
                             ConnectionHelper.getNeededConnectors(elems[1], conduit, out con1, out con2);
-                            FamilyInstance elbow2 = doc.Create.NewElbowFitting(con1, con2);
+                            elbow2 = doc.Create.NewElbowFitting(con1, con2);
 
                             trans.Commit();
                         }
+
+                        Logger.WriteData("Conduit connector", doc.ProjectInformation.Name, commandData.Application.Application.Username, commandData.Application.Application.VersionName, conduit.Category.Name, 1, ModificationTypes.Add);
+                        Logger.WriteData("Conduit connector", doc.ProjectInformation.Name, commandData.Application.Application.Username, commandData.Application.Application.VersionName, elems[0].Category.Name, 1, ModificationTypes.Change);
+                        Logger.WriteData("Conduit connector", doc.ProjectInformation.Name, commandData.Application.Application.Username, commandData.Application.Application.VersionName, elbow1.Category.Name, 2, ModificationTypes.Add);
                     }
                     else
                     {
                         Connector con1, con2;
                         LocationCurve loc1, loc2;
+                        FamilyInstance elbow1 = null, elbow2 = null;
+                        Conduit conduit = null;
                         XYZ A, B, C;
                         double katetA, katetBNeeded, katetBCurrent, hypotenuse;
                         List<Conduit> column1Conduits = new List<Conduit>(), column2Conduits = new List<Conduit>();
@@ -115,19 +123,23 @@ namespace ConduitConnector
                                 loc1.Curve = Line.CreateBound(A, C);
 
                                 ConnectionHelper.getNeededConnectors(column1Conduits[i], column2Conduits[i], out con1, out con2);
-                                Conduit conduit = Conduit.Create(doc, column1Conduits[i].GetTypeId(), con1.Origin, con2.Origin, column1Conduits[i].LevelId);
+                                conduit = Conduit.Create(doc, column1Conduits[i].GetTypeId(), con1.Origin, con2.Origin, column1Conduits[i].LevelId);
                                 Parameter diameter = conduit.get_Parameter(BuiltInParameter.RBS_CONDUIT_DIAMETER_PARAM);
                                 diameter.Set(column1Conduits[i].Diameter);
 
                                 ConnectionHelper.getNeededConnectors(column1Conduits[i], conduit, out con1, out con2);
-                                FamilyInstance elbow1 = doc.Create.NewElbowFitting(con1, con2);
-
+                                elbow1 = doc.Create.NewElbowFitting(con1, con2);
+                                
                                 ConnectionHelper.getNeededConnectors(column2Conduits[i], conduit, out con1, out con2);
-                                FamilyInstance elbow2 = doc.Create.NewElbowFitting(con1, con2);
+                                elbow2 = doc.Create.NewElbowFitting(con1, con2);
                             }
 
                             trans.Commit();
                         }
+
+                        Logger.WriteData("Conduit connector", doc.ProjectInformation.Name, commandData.Application.Application.Username, commandData.Application.Application.VersionName, conduit.Category.Name, column1Conduits.Count, ModificationTypes.Add);
+                        Logger.WriteData("Conduit connector", doc.ProjectInformation.Name, commandData.Application.Application.Username, commandData.Application.Application.VersionName, column1Conduits[0].Category.Name, column1Conduits.Count, ModificationTypes.Change);
+                        Logger.WriteData("Conduit connector", doc.ProjectInformation.Name, commandData.Application.Application.Username, commandData.Application.Application.VersionName, elbow1.Category.Name, column1Conduits.Count * 2, ModificationTypes.Add);
                     }
                 }
             }

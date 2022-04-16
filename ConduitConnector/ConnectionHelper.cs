@@ -67,8 +67,8 @@ namespace ConduitConnector
             column2Conduits.Add(conduits[secondInd]);
             conduits.RemoveAll(con => con == column1Conduits[0] || con == column2Conduits[0]);
 
-            calcClosestConduits(column1Conduits, conduits);
-            calcClosestConduits(column2Conduits, conduits);
+            calcClosestConduits(column1Conduits, conduits, 1);
+            calcClosestConduits(column2Conduits, conduits, 2);
 
             column2Conduits.Reverse();
         }
@@ -132,7 +132,7 @@ namespace ConduitConnector
                 connectors.Add(con);
         }
 
-        private static void calcClosestConduits(List<Conduit> columnConduits, List<Conduit> conduits)
+        private static void calcClosestConduits(List<Conduit> columnConduits, List<Conduit> conduits, int type)
         {
             if (conduits.Count == 1)
             {
@@ -143,7 +143,8 @@ namespace ConduitConnector
             int startCount = columnConduits.Count;
             double dist = double.MaxValue, tempDist1, tempDist2;
             Curve tempCurve = (columnConduits[0].Location as LocationCurve).Curve;
-            for (int i = conduits.Count / 2 - 1, closestConduitInd = 0; i >= 0; i--)
+   
+            for (int i = type == 1 ? conduits.Count / 2 - 1 : conduits.Count - 1, closestConduitInd = 0; i >= 0; i--)
             {
                 for (int q = 0; q < conduits.Count; q++)
                 {
@@ -163,18 +164,12 @@ namespace ConduitConnector
                 tempCurve.MakeUnbound();
                 conduits.RemoveAt(closestConduitInd);
 
-                if (conduits.Count == 1 && i == 0)
+                if (conduits.Count == 1 && i == 0 && type == 2)
                 {
                     columnConduits.Add(conduits[0]);
                     conduits.RemoveAt(0);
                 }
             }
-
-            /*if (conduits.Count == 1 && columnConduits.Count == startCount)
-            {
-                columnConduits.Add(conduits[0]);
-                conduits.RemoveAt(0);
-            }*/
         }
 
         #endregion
